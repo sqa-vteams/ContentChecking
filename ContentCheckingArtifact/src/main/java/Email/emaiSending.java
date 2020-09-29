@@ -71,6 +71,7 @@ public class emaiSending {
 		BodyPart objMessageBodyPart = new MimeBodyPart();
 
 		objMessageBodyPart.setText("Please Find The Attached Report File!");
+		objMessageBodyPart.setFileName(System.getProperty("user.dir")+"\\TestReport\\Test-Automation-Report.html");
 
 		Multipart multipart = new MimeMultipart();
 
