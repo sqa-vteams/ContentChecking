@@ -31,7 +31,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 public class emaiSending {
-	public static void sendPDFReportByGMail(String from, String pass, String to, String subject, String body) {
+	public static void sendPDFReportByGMail(String from, String pass, String to,String cc, String subject, String body) {
 
 		Properties props = System.getProperties();
 
@@ -60,7 +60,8 @@ public class emaiSending {
 		message.setFrom(new InternetAddress(from));
 
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-
+		message.setRecipients(Message.RecipientType.CC,
+                InternetAddress.parse(cc));
 		//Set subject
 
 		message.setSubject(subject);
