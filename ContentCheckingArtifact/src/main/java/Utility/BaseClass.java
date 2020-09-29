@@ -42,8 +42,8 @@ public void beforeSuite() throws IOException {
 
 @AfterSuite
 public void afterSuite() {
-	emaiSending e1=new emaiSending();
-	e1.sendPDFReportByGMail("gulraiz.smartcommerce@gmail.com", "ZXvYw9Ch", "gulraiz.shabbir@nxb.com.pk;mubbashir@nxvt.com", "Report", "");
+	//emaiSending e1=new emaiSending();
+	emaiSending.sendPDFReportByGMail("gulraiz.smartcommerce@gmail.com", "ZXvYw9Ch", "gulraiz.shabbir@nxb.com.pk;mubbashir@nxvt.com", "Report", "");
 		  driverManager.quitWebDriver();
 	  }
 }
