@@ -70,9 +70,24 @@ public class emaiSending {
 
 		BodyPart objMessageBodyPart = new MimeBodyPart();
 
-		objMessageBodyPart.setText("Please Find The Attached Report File!");
-		objMessageBodyPart.setFileName(System.getProperty("user.dir")+"\\TestReport\\Test-Automation-Report.html");
+	    /* BufferedReader br = null;
+	     String content="";
+	        try {
 
+	            String sCurrentLine;
+
+	            br = new BufferedReader(new FileReader(System.getProperty("user.dir")+"\\TestReport\\Test-Automation-Report.html"));
+
+	            while ((sCurrentLine = br.readLine()) != null) {
+	            	content=content+sCurrentLine;
+	            }
+
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }*/
+	      //  objMessageBodyPart.setContent(content, "text/html");
+		objMessageBodyPart.setText("Please Find Attachment For Details");
+		//objMessageBodyPart.setContent(content);
 		Multipart multipart = new MimeMultipart();
 
 		multipart.addBodyPart(objMessageBodyPart);
@@ -80,12 +95,12 @@ public class emaiSending {
 		objMessageBodyPart = new MimeBodyPart();
 
 		//Set path to the pdf report file
-
-		String filename = System.getProperty("user.dir")+"\\TestReport\\Test-Automation-Report.html";
+		String filePath=System.getProperty("user.dir")+"\\TestReport\\Test-Automation-Report.html";
+		String filename = "Test-Automation-Report.html";
 
 		//Create data source to attach the file in mail
 
-		DataSource source = new FileDataSource(filename);
+		DataSource source = new FileDataSource(filePath);
 
 		objMessageBodyPart.setDataHandler(new DataHandler(source));
 
