@@ -58,10 +58,17 @@ public class emaiSending {
 		    //Set from address
 
 		message.setFrom(new InternetAddress(from));
-
-		message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-		message.setRecipients(Message.RecipientType.CC,
-                InternetAddress.parse(cc));
+		String[] toArray=to.split(";");
+		for(int i=0;i<toArray.length;i++) {
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(toArray[i]));
+		}
+		String[] ccArray=cc.split(";");
+		for(int i=0;i<ccArray.length;i++) {
+			message.setRecipients(Message.RecipientType.CC,
+	                InternetAddress.parse(ccArray[i]));
+		}
+	/*	message.setRecipients(Message.RecipientType.CC,
+                InternetAddress.parse(cc));*/
 		//Set subject
 
 		message.setSubject(subject);

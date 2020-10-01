@@ -5,8 +5,11 @@ import java.awt.image.DataBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
@@ -62,6 +65,8 @@ public class FrameWorkFunctions {
 			  pageName=Constants.pageName[0];
 			  Constants.currentFolderName=Constants.WebsiteSheetName[i];
 			  childTest=ExtentTestManager.getTest().createNode(Constants.pageName[0]+" Verification");
+			  DeleteADirectory("ComparisonImages");
+			  DeleteADirectory("TemporayCheck");
 			  for(int j=0;j<Constants.WebsiteSheetStepsCount;j++)
 			  {
 				  if(pageName.equals(Constants.pageName[j])) {
@@ -112,7 +117,8 @@ public class FrameWorkFunctions {
 				if(getImagesFromURL(myArray[i])) {
 					File orignal=checkExistenceBaseImage(myArray[i]);
 					File toCheck=checkExistenceTemporayImage(myArray[i]);
-					if(orignal != null && toCheck != null) {
+					if(orignal != null) {
+						if(toCheck != null) {
 						int percentageImage=getImagePercentage(orignal,toCheck);
 					    BufferedImage imgA = ImageIO.read(orignal); 
 					    BufferedImage imgB = ImageIO.read(toCheck);
@@ -120,26 +126,24 @@ public class FrameWorkFunctions {
 					    	logStep.LogStep(grandChildTest, "true,Image *"+myArray[i]+"* is "+percentageImage+" % Equal");
 					    }
 					    else {
+					    	
+					    	CreateADirectory("ComparisonImages");
+					    	addImagesToFolder(imgA,imgB,myArray[i],"ComparisonImages");
+					    	subtractImages(imgA,imgB,myArray[i],"ComparisonImages");
 					    	logStep.LogStep(grandChildTest, "fail,Image *"+myArray[i]+"* is "+percentageImage+" % Equal");
 					    }
+						}
+						else {
+							logStep.LogStep(grandChildTest, "fail,*"+myArray[i]+"* Temporary File is not present is not present in temporary directory.");
+						}
 					}
 					else {
-				    	logStep.LogStep(grandChildTest, "fail,File Existance issue");
+				    	logStep.LogStep(grandChildTest, "fail,*"+myArray[i]+"* Orignal File is not present in orignal directory.");
 					}
 				}
 				else {
-			    	logStep.LogStep(grandChildTest, "fail,URL Image Existance issue");
+			    	logStep.LogStep(grandChildTest, "fail,No Image Exist with this Name *"+myArray[i]);
 				}
-/*				Element = driver.findElement(By.xpath("//img[contains(@src,'"+myArray[i]+"')]"));
-				js.executeScript("arguments[0].scrollIntoView(true);", Element);
-				if(driver.findElement(By.xpath("//img[contains(@src,'"+myArray[i]+"')]")) != null) {
-					//waitForDivtoScroll(driver,"//img[contains(@src,'"+myArray[i]+"')]");	
-					//verifyImageFromFolder(myArray[i]);
-					  logStep.LogStep(grandChildTest, "true,Image No: "+i+" is Success");
-				  }
-				  else {
-					  logStep.LogStep(grandChildTest, "false,Image No: "+i+" is Fail");
-				  }*/
 			}
 			catch(Exception e) {
 				logStep.LogStep(grandChildTest, "false,Try is Fail");
@@ -147,6 +151,31 @@ public class FrameWorkFunctions {
 		}
 		ExtentTestManager.endTest();
 		return true;
+	}
+	public static String getTimeAndDate() {
+		DateFormat dateFormat=new SimpleDateFormat("DD_MM_YYYY_HH_MM_SS");
+		Date date= new Date();
+		String date1=dateFormat.format(date);
+		return date1;
+	} 
+	public static boolean addImagesToFolder(BufferedImage image1, BufferedImage image2,String fileName,String directoryDestination) {
+		boolean flag=false; 
+		try {
+                String actual=fileName.substring(fileName.lastIndexOf(".") +1, fileName.length());
+                String fileNameOrignal=fileName.substring(0,fileName.lastIndexOf("."));
+                String fileNameNew=fileName.substring(0,fileName.lastIndexOf("."));
+                System.out.println(fileNameOrignal+"*******"+fileNameNew);
+                fileNameOrignal=fileNameOrignal+"_Base."+actual;
+                fileNameNew=fileNameNew+"_URL."+actual;
+               //download image to the workspace where the project is, save picture as picture.png (can be changed)
+               ImageIO.write(image1, actual, new File(System.getProperty("user.dir")+"\\src\\main\\resources\\"+Constants.currentFolderName+"\\"+directoryDestination+"\\"+fileNameOrignal));
+               ImageIO.write(image2, actual, new File(System.getProperty("user.dir")+"\\src\\main\\resources\\"+Constants.currentFolderName+"\\"+directoryDestination+"\\"+fileNameNew));
+     	      flag=true;
+		}     
+		 catch(Exception e){
+			 flag=false;
+		 }
+		return flag;
 	}
 	public static boolean getImagesFromURL(String fileName) {
 		boolean flag=false; 
@@ -184,6 +213,24 @@ public class FrameWorkFunctions {
 		 }
 		return flag;
 	}
+	public static void DeleteADirectory(String DirectoryName) throws IOException
+    {
+        //project directory
+        String workingDirectory = System.getProperty("user.dir")+"\\src\\main\\resources\\"+Constants.currentFolderName;
+        String  dir = workingDirectory + File.separator + DirectoryName;
+
+        //create a directory in the path
+
+        File file = new File(dir);
+
+        if (!file.exists()) {
+            
+        } else {
+        	FileUtils.deleteDirectory(new File(dir));
+            //System.out.println("Directory is already existed!");
+        }
+
+    }
 	public static void CreateADirectory(String DirectoryName)
     {
         //project directory
@@ -299,6 +346,19 @@ public class FrameWorkFunctions {
 		ExtentTestManager.endTest();
 		return true;
 	}
+	private static void subtractImages(BufferedImage image1, BufferedImage image2,String fileName,String directoryTo) throws IOException {
+		  BufferedImage image3 = new BufferedImage(image1.getWidth(), image1.getHeight(), image1.getType());
+		  int color;
+		  for(int x = 0; x < image1.getWidth(); x++)
+		      for(int y = 0; y < image1.getHeight(); y++) {
+		          color = Math.abs(image2.getRGB(x, y) - image1.getRGB(x, y));                
+		          image3.setRGB(x, y, color);
+		      }
+		  String actual=fileName.substring(fileName.lastIndexOf(".") +1, fileName.length());
+          String fileNameOrignal=fileName.substring(0,fileName.lastIndexOf("."));
+          fileNameOrignal=fileNameOrignal+"_Comparison."+actual;
+		  ImageIO.write(image3, actual,  new File(System.getProperty("user.dir")+"\\src\\main\\resources\\"+Constants.currentFolderName+"\\"+directoryTo+"\\"+fileNameOrignal));
+		}
 	public static boolean verifyImageFromFolder(String imageName) throws FindFailed {
 		Screen screen = new Screen();
 		screen.setAutoWaitTimeout(120);
