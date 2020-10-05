@@ -33,6 +33,9 @@ import org.sikuli.script.Screen;
 import org.testng.Assert;
 
 import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
+import com.aventstack.extentreports.markuputils.ExtentColor;
+import com.aventstack.extentreports.markuputils.MarkupHelper;
 
 import ExcelUtility.ExcelDriver;
 import Reports.ExtentLogging;
@@ -49,6 +52,36 @@ public class FrameWorkFunctions {
 	 static ExtentLogging logStep;
 	public FrameWorkFunctions(WebDriver driver) {
 		FrameWorkFunctions.driver=driver;
+	}
+	public void autoStepFunctionBaseImages() throws Throwable {
+		logStep=new ExtentLogging();
+		driverExcel=new ExcelDriver();
+		Sheet mainSheet=driverExcel.getExcelDriver("websitesFile.xlsx", "BaseImages");
+		driverExcel.getDataBaseSheetAuto(mainSheet);
+		  parentTest=ExtentTestManager.startTest("Image Getter");
+		  try {
+		  for(int i=0;i<Constants.WebsiteSheetStepsCount;i++) {
+			  Constants.currentFolderName=Constants.WebsitesURLFolderName[i];
+			  perform("GOTOURL","","",Constants.WebsitesURL[i],"10");
+			  if(Constants.WebsitesURLData[i].equals("ALL")) {
+				  getALLImagesFromBaseURL();				  
+			  }
+			  else {
+				  String[] myArray=Constants.WebsitesURLData[i].split(";");
+				  for(int j=0;j<myArray.length;j++) {
+					  getSelectedImagesFromBaseURL(myArray[j]);
+				  }
+			  }
+			  parentTest.log(Status.PASS, MarkupHelper.createLabel(Constants.WebsitesURL[i] +"Step  Passed", ExtentColor.GREEN));
+			}
+		  }
+		  catch(Exception e) {
+			  parentTest.log(Status.FAIL, MarkupHelper.createLabel("Step Failed", ExtentColor.RED));
+			  
+		  }
+			  ExtentTestManager.endTest();
+			  System.out.println("*******************************************");
+		  
 	}
 	public void autoStepFunction() throws Throwable {
 		logStep=new ExtentLogging();
@@ -213,6 +246,82 @@ public class FrameWorkFunctions {
 		 }
 		return flag;
 	}
+	public static boolean getALLImagesFromBaseURL() {
+		boolean flag=false; 
+		try {
+	      List<WebElement> elementList = new ArrayList(); 
+	      elementList = driver.findElements(By.tagName("img"));       
+	      elementList.addAll(driver.findElements(By.tagName("img"))); 
+	      List<WebElement> finalList = new ArrayList(); 
+	      String imageName="";
+	      URL imageURL = null;
+		      for (WebElement element : elementList)
+	          { 
+
+	               if(element.getAttribute("src") != null) 
+	                { 
+	                       finalList.add(element); 
+	                       imageName=element.getAttribute("src");
+	                    	   imageURL = new URL(imageName);
+	                           BufferedImage saveImage = ImageIO.read(imageURL);
+	                           String actualImageName=imageName.substring(imageName.lastIndexOf("/") +1, imageName.length());
+	                           String actual=imageName.substring(imageName.lastIndexOf(".") +1, imageName.length());
+	                           System.out.println(actual);
+	                           CreateAParentDirectory(Constants.currentFolderName);
+	                           CreateADirectory("BaseImages");
+	                           //download image to the workspace where the project is, save picture as picture.png (can be changed)
+	                           ImageIO.write(saveImage, actual, new File(System.getProperty("user.dir")+"\\src\\main\\resources\\"+Constants.currentFolderName+"\\BaseImages\\"+actualImageName));
+	                       
+	                       //String actual=imageName.substring(50, imageName.length());
+	                      // System.out.println(actual);
+	                }    
+	            }
+	      
+	      
+	      flag=true;
+		 }
+		 catch(Exception e){
+			 flag=false;
+		 }
+		return flag;
+	}
+	public static boolean getSelectedImagesFromBaseURL(String fileName) {
+		boolean flag=false; 
+		try {
+	      List<WebElement> elementList = new ArrayList(); 
+	      elementList = driver.findElements(By.tagName("img"));       
+	      elementList.addAll(driver.findElements(By.tagName("img"))); 
+	      List<WebElement> finalList = new ArrayList(); 
+	      String imageName="";
+	      URL imageURL = null;
+    	  for (WebElement element : elementList)
+          { 
+
+               if(element.getAttribute("src") != null) 
+                { 
+                       finalList.add(element); 
+                       imageName=element.getAttribute("src");
+                       if(imageName.contains(fileName)) {
+                    	   imageURL = new URL(imageName);
+                           BufferedImage saveImage = ImageIO.read(imageURL);
+                           String actual=imageName.substring(imageName.lastIndexOf(".") +1, imageName.length());
+                           System.out.println(actual);
+                           CreateAParentDirectory(Constants.currentFolderName);
+                           CreateADirectory("BaseImages");
+                           //download image to the workspace where the project is, save picture as picture.png (can be changed)
+                           ImageIO.write(saveImage, actual, new File(System.getProperty("user.dir")+"\\src\\main\\resources\\"+Constants.currentFolderName+"\\BaseImages\\"+fileName));
+                       }
+                       //String actual=imageName.substring(50, imageName.length());
+                      // System.out.println(actual);
+                }    
+            } 
+	      flag=true;
+		 }
+		 catch(Exception e){
+			 flag=false;
+		 }
+		return flag;
+	}
 	public static void DeleteADirectory(String DirectoryName) throws IOException
     {
         //project directory
@@ -235,6 +344,26 @@ public class FrameWorkFunctions {
     {
         //project directory
         String workingDirectory = System.getProperty("user.dir")+"\\src\\main\\resources\\"+Constants.currentFolderName;
+        String  dir = workingDirectory + File.separator + DirectoryName;
+
+        System.out.println("Final file directory : " + dir);
+
+        //create a directory in the path
+
+        File file = new File(dir);
+
+        if (!file.exists()) {
+            file.mkdir();
+            System.out.println("Directory is created!");
+        } else {
+            System.out.println("Directory is already existed!");
+        }
+
+    }
+	public static void CreateAParentDirectory(String DirectoryName)
+    {
+        //project directory
+        String workingDirectory = System.getProperty("user.dir")+"\\src\\main\\resources\\";
         String  dir = workingDirectory + File.separator + DirectoryName;
 
         System.out.println("Final file directory : " + dir);

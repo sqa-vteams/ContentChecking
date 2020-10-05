@@ -13,5 +13,8 @@ public class Constants {
 	public static String currentURL=null;
 	public static int WebsiteSheetStepsCount;
 //	public static String[] WebsiteExecution=null;
+	public static String[] WebsitesURL=null;
+	public static String[] WebsitesURLData=null;
+	public static String[] WebsitesURLFolderName=null;
 
 }
